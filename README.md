@@ -100,15 +100,39 @@ podman compose up -d --build
 └── README.md
 ```
 
-## API Endpoints (планируемые)
+## API Endpoints
+
+### Комнаты
 
 | Method | Endpoint | Описание |
 |--------|----------|----------|
-| POST | `/api/rooms` | Создать комнату |
+| POST | `/api/rooms` | Создать комнату (body: `name`, `host_nickname`) |
 | GET | `/api/rooms/:id` | Получить информацию о комнате |
-| POST | `/api/rooms/:id/join` | Присоединиться к комнате |
-| POST | `/api/rooms/:id/start-round` | Начать раунд (ведущий) |
-| POST | `/api/rooms/:id/vote` | Проголосовать |
-| POST | `/api/rooms/:id/reveal` | Вскрыть карты (ведущий) |
+| POST | `/api/rooms/:id/join` | Присоединиться к комнате (body: `nickname`, `role`) |
 
-**WebSocket события** для real-time обновлений будут добавлены при реализации.
+### Раунды
+
+| Method | Endpoint | Описание |
+|--------|----------|----------|
+| POST | `/api/rooms/:id/rounds` | Начать раунд (body: `task_description`, `host_id`) |
+
+### Голоса
+
+| Method | Endpoint | Описание |
+|--------|----------|----------|
+| POST | `/api/rounds/:id/votes` | Проголосовать (body: `player_id`, `value`) |
+| POST | `/api/rounds/:id/reveal` | Вскрыть карты (body: `host_id`) |
+
+### WebSocket события
+
+| Событие | Направление | Описание |
+|---------|-------------|----------|
+| `connect` | client → server | Подключение клиента |
+| `disconnect` | client → server | Отключение клиента |
+| `join_room` | client → server | Подключение к комнате |
+| `leave_room` | client → server | Покидание комнаты |
+| `room_created` | server → client | Комната создана |
+| `player_joined` | server → client | Игрок присоединился |
+| `round_started` | server → client | Раунд начался |
+| `vote_cast` | server → client | Голос подан |
+| `round_revealed` | server → client | Карты вскрыты |

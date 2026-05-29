@@ -25,6 +25,9 @@ def create_app():
     # Import models to register them with SQLAlchemy
     from . import models
 
+    # Import socket handlers
+    from . import socket as socket_handlers
+
     from .routes import bp as routes_bp
     app.register_blueprint(routes_bp, url_prefix='/api')
 
