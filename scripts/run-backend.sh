@@ -4,8 +4,10 @@
 
 cd backend
 source venv/bin/activate
-export FLASK_APP=app
-export FLASK_ENV=development
 
 echo "🚀 Запуск backend'а..."
-flask run --host=0.0.0.0 --port=5000
+python -c "
+from app import create_app, socketio
+app = create_app()
+socketio.run(app, host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
+"
