@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { api } from '../api';
 import { Room, Player, FullVote } from '../types';
@@ -36,6 +36,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Рефы для актуальных значений в слушателях
+  const roomRef = useRef<Room | null>(room);
+  const currentPlayerRef = useRef<Player | null>(currentPlayer);
+  const socketRef = useRef<Socket | null>(socket);
+  
+  // Обновляем рефы при изменении
+  useEffect(() => {
+    roomRef.current = room;
+  }, [room]);
+  
+  useEffect(() => {
+    currentPlayerRef.current = currentPlayer;
+  }, [currentPlayer]);
+
+  useEffect(() => {
+    socketRef.current = socket;
+  }, [socket]);
+  
+  // Автоматическая подписка на комнату когда room устанавливается
+  useEffect(() => {
+    if (room && socketRef.current) {
+      console.log('📡 Auto-subscribing to room:', room.id);
+      socketRef.current.emit('join_room', { room_id: room.id });
+    } else if (room && !socketRef.current) {
+      console.log('⚠️ Room set but socket not ready yet');
+    }
+  }, [room]);
+
   // Инициализация WebSocket
   useEffect(() => {
     const socketInstance = io('/', {
@@ -47,36 +75,71 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.log('WebSocket connected');
     });
 
+    socketInstance.on('disconnect', () => {
+      console.log('WebSocket disconnected');
+    });
+
     socketInstance.on('room_created', (data) => {
-      console.log('Room created:', data);
-      refreshRoom();
+      console.log('📢 room_created received:', data);
+      const currentRoom = roomRef.current;
+      console.log('Current room:', currentRoom?.id);
+      if (currentRoom && currentRoom.id === data.room_id) {
+        console.log('Updating room after room_created');
+        api.getRoom(data.room_id).then(setRoom).catch(err => console.error(err));
+      }
     });
 
     socketInstance.on('player_joined', (data) => {
-      console.log('Player joined:', data);
-      refreshRoom();
+      console.log('📢 player_joined received:', data);
+      const currentRoom = roomRef.current;
+      console.log('Current room:', currentRoom?.id);
+      console.log('Event room_id:', data.room_id);
+      if (currentRoom && currentRoom.id === data.room_id) {
+        console.log('Updating room after player_joined');
+        api.getRoom(data.room_id).then(newRoom => {
+          console.log('New room players:', newRoom.players);
+          setRoom(newRoom);
+          if (currentPlayerRef.current) {
+            const updatedPlayer = newRoom.players.find(p => p.id === currentPlayerRef.current!.id);
+            if (updatedPlayer) setCurrentPlayer(updatedPlayer);
+          }
+        }).catch(err => console.error(err));
+      }
     });
 
     socketInstance.on('round_started', (data) => {
       console.log('Round started:', data);
-      setActiveRound(data.round_id);
-      setMyVote(null);
-      setAllVotes([]);
+      const currentRoom = roomRef.current;
+      if (currentRoom && currentRoom.id === data.room_id) {
+        setActiveRound(data.round_id);
+        setMyVote(null);
+        setAllVotes([]);
+      }
     });
 
     socketInstance.on('vote_cast', (data) => {
       console.log('Vote cast:', data);
-      if (data.player_id === currentPlayer?.id) {
-        setMyVote(myVote);
+      const currentRoom = roomRef.current;
+      if (currentRoom && currentRoom.id === data.room_id) {
+        api.getRoom(data.room_id).then(newRoom => {
+          setRoom(newRoom);
+          // Обновим currentPlayer если он есть
+          if (currentPlayerRef.current) {
+            const updatedPlayer = newRoom.players.find(p => p.id === currentPlayerRef.current!.id);
+            if (updatedPlayer) setCurrentPlayer(updatedPlayer);
+          }
+        }).catch(err => console.error(err));
       }
-      refreshRoom();
     });
 
     socketInstance.on('round_revealed', (data) => {
       console.log('Round revealed:', data);
-      setActiveRound(null);
-      setAllVotes(data.votes || []);
-      setMyVote(null);
+      const currentRoom = roomRef.current;
+      if (currentRoom && currentRoom.id === data.room_id) {
+        setActiveRound(null);
+        setAllVotes(data.votes || []);
+        setMyVote(null);
+      }
     });
 
     setSocket(socketInstance);
@@ -84,7 +147,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => {
       socketInstance.close();
     };
-  }, [currentPlayer]);
+  }, []); // Убрали зависимости чтобы не пересоздавать слушатели
 
   const refreshRoom = async () => {
     if (!room) return;
@@ -153,11 +216,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       
       // Обновляем URL с room_id
       window.history.pushState({}, '', `/room/${roomId}`);
-      
-      // Подключиться к комнате через WebSocket
-      if (socket) {
-        socket.emit('join_room', { room_id: roomId });
-      }
       
       setLoading(false);
     } catch (err: any) {

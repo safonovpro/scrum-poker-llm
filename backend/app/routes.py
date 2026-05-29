@@ -43,7 +43,7 @@ def create_room():
         'room_name': room.name,
         'host_id': host.id,
         'host_nickname': host_nickname
-    }, room=room.id)
+    })
     
     return jsonify({
         'room_id': room.id,
@@ -124,7 +124,9 @@ def join_room(room_id):
     db.session.commit()
     
     # Отправляем событие WebSocket
+    print(f'📤 Emitting player_joined to room {room.id}: {player.nickname}')
     socketio.emit('player_joined', {
+        'room_id': room.id,
         'player_id': player.id,
         'nickname': nickname,
         'role': role
@@ -177,6 +179,7 @@ def start_round(room_id):
     
     # Отправляем событие WebSocket
     socketio.emit('round_started', {
+        'room_id': room.id,
         'round_id': round.id,
         'task_description': task_description,
         'players': [
@@ -232,6 +235,7 @@ def cast_vote(round_id):
     
     # Отправляем событие WebSocket
     socketio.emit('vote_cast', {
+        'room_id': player.room_id,
         'round_id': round_id,
         'player_id': player_id,
         'voted': value is not None
@@ -276,6 +280,7 @@ def reveal_votes(round_id):
     
     # Отправляем событие WebSocket
     socketio.emit('round_revealed', {
+        'room_id': room.id,
         'round_id': round_id,
         'votes': votes_data
     }, room=room.id)
