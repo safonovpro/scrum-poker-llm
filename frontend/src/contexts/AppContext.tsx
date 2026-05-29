@@ -37,7 +37,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Инициализация WebSocket
   useEffect(() => {
     const socketInstance = io('/', {
-      transports: ['websocket'],
+      transports: ['polling'],
+      autoConnect: true,
     });
 
     socketInstance.on('connect', () => {
