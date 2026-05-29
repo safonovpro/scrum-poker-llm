@@ -16,6 +16,8 @@ interface AppContextType {
   // Actions
   createRoom: (name: string, hostNickname: string) => Promise<void>;
   joinRoom: (roomId: string, nickname: string, role: 'player' | 'observer') => Promise<void>;
+  loadRoom: (roomId: string) => Promise<void>;
+  setCurrentPlayer: (player: Player | null) => void;
   startRound: (taskDescription: string) => Promise<void>;
   castVote: (value: number) => Promise<void>;
   revealVotes: () => Promise<void>;
@@ -112,7 +114,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const roomData = await api.getRoom(data.room_id);
       
       setRoom(roomData);
-      setCurrentPlayer(roomData.players.find(p => p.id === data.host_id) || null);
+      const player = roomData.players.find(p => p.id === data.host_id) || null;
+      setCurrentPlayer(player);
+      
+      // Сохраняем player_id в localStorage
+      if (player) {
+        localStorage.setItem('currentPlayerId', player.id);
+        localStorage.setItem('currentPlayerNickname', hostNickname);
+      }
+      
+      // Обновляем URL с room_id
+      window.history.pushState({}, '', `/room/${data.room_id}`);
+      
       setLoading(false);
     } catch (err: any) {
       setError(err.message || 'Failed to create room');
@@ -129,7 +142,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const roomData = await api.getRoom(roomId);
       
       setRoom(roomData);
-      setCurrentPlayer(roomData.players.find(p => p.id === data.player_id) || null);
+      const player = roomData.players.find(p => p.id === data.player_id) || null;
+      setCurrentPlayer(player);
+      
+      // Сохраняем player_id в localStorage
+      if (player) {
+        localStorage.setItem('currentPlayerId', player.id);
+        localStorage.setItem('currentPlayerNickname', nickname);
+      }
+      
+      // Обновляем URL с room_id
+      window.history.pushState({}, '', `/room/${roomId}`);
       
       // Подключиться к комнате через WebSocket
       if (socket) {
@@ -140,6 +163,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       setError(err.message || 'Failed to join room');
       setLoading(false);
+      throw err;
+    }
+  };
+
+  const loadRoom = async (roomId: string) => {
+    try {
+      const roomData = await api.getRoom(roomId);
+      setRoom(roomData);
+    } catch (err: any) {
+      console.error('Failed to load room:', err);
       throw err;
     }
   };
@@ -188,6 +221,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         error,
         createRoom,
         joinRoom,
+        loadRoom,
+        setCurrentPlayer,
         startRound,
         castVote,
         revealVotes,

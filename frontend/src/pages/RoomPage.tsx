@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { FullVote } from '../types';
 
-// Карты Фибоначчи для Scrum Poker
-const CARDS = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, '?'];
+interface RoomPageProps {
+  roomId?: string;
+}
 
-export function RoomPage() {
+export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   const navigate = useNavigate();
   const {
     room,
@@ -17,6 +18,8 @@ export function RoomPage() {
     startRound,
     castVote,
     revealVotes,
+    loadRoom,
+    setCurrentPlayer,
     loading,
     error,
   } = useApp();
@@ -24,14 +27,116 @@ export function RoomPage() {
   const [taskDescription, setTaskDescription] = useState('');
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [showRevealConfirm, setShowRevealConfirm] = useState(false);
+  const [hasStartedLoading, setHasStartedLoading] = useState(false);
 
+  // Загружаем комнату и currentPlayer по roomId из URL при монтировании
   useEffect(() => {
-    if (!room || !currentPlayer) {
+    if (!propRoomId || hasStartedLoading) return;
+    
+    console.log('Loading room:', propRoomId);
+    setHasStartedLoading(true);
+    
+    loadRoom(propRoomId).then(() => {
+      console.log('Room loaded');
+      
+      // Сразу пробуем загрузить текущего игрока из localStorage
+      const savedPlayerId = localStorage.getItem('currentPlayerId');
+      console.log('Saved player ID:', savedPlayerId);
+      
+      if (savedPlayerId) {
+        // Ждём немного чтобы room обновился в контексте
+        const checkPlayer = setInterval(() => {
+          if (room && room.id === propRoomId) {
+            const savedPlayer = room.players.find(p => p.id === savedPlayerId);
+            console.log('Found player:', savedPlayer);
+            if (savedPlayer) {
+              setCurrentPlayer(savedPlayer);
+              clearInterval(checkPlayer);
+            }
+          }
+        }, 100);
+        
+        // Очищаем через 3 секунды
+        setTimeout(() => clearInterval(checkPlayer), 3000);
+      }
+    }).catch((err) => {
+      console.error('Failed to load room:', err);
       navigate('/');
-    }
-  }, [room, currentPlayer, navigate]);
+    });
+  }, [propRoomId, hasStartedLoading]);
 
-  if (!room || !currentPlayer) {
+  // Отдельный эффект для поиска currentPlayer после загрузки комнаты
+  useEffect(() => {
+    if (!propRoomId || !room || room.id !== propRoomId || currentPlayer || !hasStartedLoading) return;
+    
+    const savedPlayerId = localStorage.getItem('currentPlayerId');
+    if (savedPlayerId) {
+      const savedPlayer = room.players.find(p => p.id === savedPlayerId);
+      if (savedPlayer) {
+        console.log('Found player from localStorage (2nd check):', savedPlayer);
+        setCurrentPlayer(savedPlayer);
+      }
+    }
+  }, [room, propRoomId, currentPlayer, setCurrentPlayer, hasStartedLoading]);
+    
+  // Таймаут для проверки загрузки комнаты (чтобы не делать навигацию слишком рано)
+  const [loadTimeout, setLoadTimeout] = useState(false);
+  useEffect(() => {
+    if (hasStartedLoading && !loadTimeout) {
+      const timeout = setTimeout(() => {
+        setLoadTimeout(true);
+      }, 3000); // Даем 3 секунды на загрузку
+      return () => clearTimeout(timeout);
+    }
+  }, [hasStartedLoading, loadTimeout]);
+    
+  useEffect(() => {
+    console.log('RoomPage useEffect - room:', room?.id, 'currentPlayer:', currentPlayer?.id, 'propRoomId:', propRoomId, 'hasStartedLoading:', hasStartedLoading, 'loadTimeout:', loadTimeout);
+    
+    // Если нет roomId в пропсах - возвращаемся на главную
+    if (!propRoomId) {
+      console.log('No roomId - navigating to /');
+      navigate('/');
+      return;
+    }
+    
+    // Если ещё не начали загружать - не делаем ничего
+    if (!hasStartedLoading) {
+      console.log('Not started loading yet...');
+      return;
+    }
+    
+    // Если roomId не совпадает с комнатой - возвращаемся
+    if (room && room.id !== propRoomId) {
+      console.log('roomId mismatch - navigating to /');
+      navigate('/');
+      return;
+    }
+    
+    // Если комната не загрузилась за 3 секунды - возвращаемся
+    if (!room && loadTimeout) {
+      console.log('Room not loaded after timeout - navigating to /');
+      navigate('/');
+      return;
+    }
+    
+    // Если комната загружена, но нет currentPlayer - ждём ещё немного
+    if (room && room.id === propRoomId && !currentPlayer) {
+      console.log('Room loaded, waiting for currentPlayer...');
+      return;
+    }
+    
+    // Если есть комната и currentPlayer - всё ок
+    if (room && currentPlayer) {
+      console.log('Room and currentPlayer loaded - staying');
+      return;
+    }
+    
+    // Иначе ждём
+    console.log('Waiting...');
+  }, [propRoomId, room, currentPlayer, navigate, hasStartedLoading, loadTimeout]);
+
+  if (!hasStartedLoading || (!room && !loadTimeout) || !currentPlayer) {
     return <div className="loading">Загрузка...</div>;
   }
 
@@ -75,7 +180,7 @@ export function RoomPage() {
         <div className="room-info">
           <span>ID: {room.id.slice(0, 8)}...</span>
           <a
-            href={`/?room=${room.id}`}
+            href={`${window.location.origin}/?room=${room.id}`}
             className="invite-link"
             onClick={(e) => {
               e.preventDefault();

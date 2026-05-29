@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { createRoom, joinRoom } = useApp();
+  const [searchParams] = useSearchParams();
+  const { createRoom, joinRoom, room } = useApp();
   
   const [mode, setMode] = useState<'create' | 'join'>('create');
   const [roomName, setRoomName] = useState('');
@@ -13,6 +14,15 @@ export function HomePage() {
   const [role, setRole] = useState<'player' | 'observer'>('player');
   const [loading, setLoading] = useState(false);
 
+  // Если пришли с room_id из URL, сразу заполняем поле
+  useEffect(() => {
+    const roomParam = searchParams.get('room');
+    if (roomParam) {
+      setRoomId(roomParam);
+      setMode('join');
+    }
+  }, [searchParams]);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!roomName || !nickname) return;
@@ -20,9 +30,20 @@ export function HomePage() {
     setLoading(true);
     try {
       await createRoom(roomName, nickname);
-      navigate('/room');
-    } catch (err) {
-      console.error(err);
+      // createRoom уже обновляет URL через window.history.pushState
+      // Перезагружаем страницу чтобы загрузить комнату
+      const roomParam = searchParams.get('room');
+      if (roomParam) {
+        window.location.href = `/room/${roomParam}`;
+      } else {
+        // Ждём когда room обновится в контексте
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
+    } catch (err: any) {
+      console.error('Failed to create room:', err);
+      alert('Ошибка: ' + (err.message || 'Не удалось создать комнату'));
     } finally {
       setLoading(false);
     }
@@ -35,9 +56,12 @@ export function HomePage() {
     setLoading(true);
     try {
       await joinRoom(roomId, nickname, role);
-      navigate('/room');
-    } catch (err) {
-      console.error(err);
+      // joinRoom уже обновляет URL через window.history.pushState
+      // Перезагружаем страницу чтобы загрузить комнату
+      window.location.reload();
+    } catch (err: any) {
+      console.error('Failed to join room:', err);
+      alert('Ошибка: ' + (err.message || 'Не удалось присоединиться'));
     } finally {
       setLoading(false);
     }
