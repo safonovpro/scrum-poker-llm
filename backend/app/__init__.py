@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
 
 db = SQLAlchemy()
-socketio = SocketIO(cors_allowed_origins="*", async_mode="gevent")
+socketio = SocketIO(cors_allowed_origins="*", async_mode="threading")
 
 def create_app():
     app = Flask(__name__)
