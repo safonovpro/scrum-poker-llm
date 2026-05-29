@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+
+# Загружаем переменные окружения из .env
+load_dotenv()
+
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -16,6 +21,9 @@ def create_app():
     CORS(app)
     db.init_app(app)
     socketio.init_app(app)
+
+    # Import models to register them with SQLAlchemy
+    from . import models
 
     from .routes import bp as routes_bp
     app.register_blueprint(routes_bp, url_prefix='/api')
