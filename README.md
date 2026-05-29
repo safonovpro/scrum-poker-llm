@@ -44,19 +44,27 @@
 
 ## Быстрый старт
 
-### Локальная разработка
+### Первый запуск
 
 ```bash
-# Клонировать репозиторий
-git clone <repo-url>
-cd scrum-poker
+# 1. Настроить виртуальное окружение для backend
+./scripts/setup.sh
 
-# Запустить backend и базу данных через Podman/Docker
+# 2. Запустить PostgreSQL
+podman compose up -d
+```
+
+### Ежедневная разработка
+
+```bash
+# Запустить PostgreSQL (если не запущен)
 podman compose up -d
 
-# Запустить frontend в режиме разработки (порт 3000)
+# Запустить backend
+./scripts/run-backend.sh
+
+# Запустить frontend (в новом терминале)
 cd frontend
-npm install
 npm run dev
 ```
 

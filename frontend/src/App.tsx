@@ -1,17 +1,21 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppProvider } from './contexts/AppContext';
+import { HomePage } from './pages/HomePage';
+import { RoomPage } from './pages/RoomPage';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div>
-      <h1>Scrum Poker LLM</h1>
-      <p>Приложение в разработке...</p>
-      <button onClick={() => setCount((count) => count + 1)}>
-        count is {count}
-      </button>
-    </div>
-  )
+    <AppProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/room" element={<RoomPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AppProvider>
+  );
 }
 
-export default App
+export default App;
