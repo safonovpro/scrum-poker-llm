@@ -7,6 +7,7 @@ interface AppContextType {
   room: Room | null;
   currentPlayer: Player | null;
   activeRound: number | null;
+  activeRoundTask: string | null;
   myVote: number | null;
   allVotes: FullVote[];
   socket: Socket | null;
@@ -30,6 +31,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [room, setRoom] = useState<Room | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [activeRound, setActiveRound] = useState<number | null>(null);
+  const [activeRoundTask, setActiveRoundTask] = useState<string | null>(null);
   const [myVote, setMyVote] = useState<number | null>(null);
   const [allVotes, setAllVotes] = useState<FullVote[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -112,6 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const currentRoom = roomRef.current;
       if (currentRoom && currentRoom.id === data.room_id) {
         setActiveRound(data.round_id);
+        setActiveRoundTask(data.task_description || null);
         setMyVote(null);
         setAllVotes([]);
         
@@ -156,6 +159,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const currentRoom = roomRef.current;
       if (currentRoom && currentRoom.id === data.room_id) {
         setActiveRound(null);
+        setActiveRoundTask(null);
         setAllVotes(data.votes || []);
         setMyVote(null);
       }
@@ -252,6 +256,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Найти активный раунд из загруженных данных
       const active = roomData.recent_rounds.find(r => r.is_active);
       setActiveRound(active?.id || null);
+      setActiveRoundTask(active?.task_description || null);
       
       // Обновить голоса если есть активный раунд
       if (active) {
@@ -308,6 +313,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         room,
         currentPlayer,
         activeRound,
+        activeRoundTask,
         myVote,
         allVotes,
         socket,

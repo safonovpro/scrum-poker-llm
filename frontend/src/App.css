@@ -299,11 +299,6 @@ body {
   font-size: 1.25rem;
 }
 
-.task-desc {
-  font-weight: 400;
-  color: var(--text-muted);
-}
-
 .voting-cards {
   display: flex;
   flex-wrap: wrap;

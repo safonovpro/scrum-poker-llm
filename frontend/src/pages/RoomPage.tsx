@@ -15,6 +15,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     room,
     currentPlayer,
     activeRound,
+    activeRoundTask,
     myVote,
     allVotes,
     startRound,
@@ -26,9 +27,9 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     error,
   } = useApp();
 
-  const [taskDescription, setTaskDescription] = useState('');
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [hasStartedLoading, setHasStartedLoading] = useState(false);
+  const [taskDescription, setTaskDescription] = useState('');
 
   // Загружаем комнату и currentPlayer по roomId из URL при монтировании
   useEffect(() => {
@@ -259,8 +260,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
       {activeRound && (
         <section className="active-round-section">
           <h2>
-            Раунд #{activeRound}
-            {taskDescription && <span className="task-desc">: {taskDescription}</span>}
+            {activeRoundTask || `Раунд #${activeRound}`}
           </h2>
 
           {!isObserver && (
