@@ -232,7 +232,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               type="text"
               value={taskDescription}
               onChange={(e) => setTaskDescription(e.target.value)}
-              placeholder="Описание задачи (необязательно)"
+              placeholder="Номер стори"
               className="task-input"
             />
             <button
