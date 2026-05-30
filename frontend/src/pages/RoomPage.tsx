@@ -302,8 +302,12 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
             Результаты
             {(() => {
               const median = calculateMedian(allVotes);
-              return median !== null ? (
-                <span className="median-value">Медиана: {median}</span>
+              const average = calculateAverage(allVotes);
+              return (median !== null || average !== null) ? (
+                <>
+                  {median !== null && <span className="median-value">Медиана: {median}</span>}
+                  {average !== null && <span className="median-value">Среднее: {average}</span>}
+                </>
               ) : null;
             })()}
           </h2>
@@ -348,4 +352,15 @@ function calculateMedian(votes: FullVote[]): number | null {
     // Нечётное количество - берём среднее
     return values[mid];
   }
+}
+
+function calculateAverage(votes: FullVote[]): number | null {
+  const values = votes
+    .map(v => v.value)
+    .filter((v): v is number => v !== null);
+  
+  if (values.length === 0) return null;
+  
+  const sum = values.reduce((a, b) => a + b, 0);
+  return Math.round(sum / values.length * 10) / 10; // Округляем до 1 знака после запятой
 }
