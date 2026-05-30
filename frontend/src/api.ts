@@ -9,6 +9,10 @@ import {
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
+// Debug: показать какой API URL используется
+console.log('API_BASE:', API_BASE);
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+
 export const api = {
   // Комнаты
   async createRoom(data: CreateRoomData): Promise<{ room_id: string; room_name: string; host_id: string; invite_url: string }> {
