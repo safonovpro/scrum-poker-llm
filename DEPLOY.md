@@ -62,7 +62,7 @@ docker compose -f docker-compose.prod.yml logs -f backend
 
 ```bash
 # Run migrations
-docker compose exec backend flask db upgrade
+docker compose -f docker-compose.prod.yml exec backend alembic upgrade head
 ```
 
 ### Access Application
@@ -98,122 +98,20 @@ npm run build
 
 ```bash
 # All services
-docker compose logs -f
+docker compose -f docker-compose.prod.yml logs -f
 
 # Specific service
-docker compose logs -f backend
-docker compose logs -f db
+docker compose -f docker-compose.prod.yml logs -f backend
 ```
 
 #### Restart Services
 
 ```bash
-docker compose restart
+docker compose -f docker-compose.prod.yml restart
 ```
 
 #### Stop Services
 
 ```bash
-docker compose down
-```
-
-#### Update Application
-
-```bash
-# Pull latest code
-git pull
-
-# Rebuild and restart
-docker compose build
-docker compose up -d
-
-# Run migrations if needed
-docker compose exec backend flask db upgrade
-```
-
-### Backup
-
-#### Backup PostgreSQL Data
-
-```bash
-# Create backup directory
-mkdir -p backups
-
-# Backup database
-docker compose exec db pg_dump -U scrum_poker scrum_poker > backups/backup-$(date +%Y%m%d).sql
-
-# Restore from backup
-cat backups/backup-20240101.sql | docker compose exec -T db psql -U scrum_poker scrum_poker
-```
-
-#### Backup Location
-
-PostgreSQL data is stored in Docker volume `pgdata`. To backup:
-
-```bash
-docker run --rm -v scrum-poker-pgdata:/data -v $(pwd):/backup alpine tar czf /backup/pgdata-backup-$(date +%Y%m%d).tar.gz /data
-```
-
-### Security Recommendations
-
-1. **Use HTTPS:** Setup nginx reverse proxy with SSL
-2. **Change default passwords:** Always change in `.env`
-3. **Firewall:** Only expose necessary ports (80, 443)
-4. **Regular updates:** Keep Docker and system packages updated
-5. **Secrets management:** Use Docker secrets or environment variables from secure source
-
-### Troubleshooting
-
-#### Backend won't start
-
-```bash
-# Check logs
-docker compose logs backend
-
-# Check database connection
-docker compose exec backend python -c "from app import db; print(db.engine.url)"
-```
-
-#### Database connection issues
-
-```bash
-# Check if database is running
-docker compose ps db
-
-# Check database logs
-docker compose logs db
-
-# Test connection
-docker compose exec backend python -c "import psycopg2; psycopg2.connect('postgresql://scrum_poker:password@db:5432/scrum_poker')"
-```
-
-#### Migration errors
-
-```bash
-# Check current migration status
-docker compose exec backend flask db current
-
-# Run migrations
-docker compose exec backend flask db upgrade
-
-# If stuck, try
-docker compose exec backend flask db stamp head
-```
-
-### Monitoring
-
-#### Check Resource Usage
-
-```bash
-docker compose stats
-```
-
-#### Health Check
-
-```bash
-# Backend health
-curl http://localhost:5000/api/rooms
-
-# Database health
-docker compose exec db pg_isready -U scrum_poker
+docker compose -f docker-compose.prod.yml down
 ```

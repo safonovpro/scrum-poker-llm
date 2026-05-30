@@ -119,21 +119,6 @@ podman compose up -d --build
 
 Подробная инструкция по деплою на production сервер: **[DEPLOY.md](DEPLOY.md)**
 
-### Быстрый старт на сервере
-
-```bash
-# 1. Клонировать репозиторий
-git clone <your-repo-url>
-cd scrum-poker-llm
-
-# 2. Настроить окружение
-cp .env.example .env
-nano .env  # Изменить пароли и ключи
-
-# 3. Запустить
-./scripts/deploy.sh
-```
-
 ### Локальная разработка
 
 Смотрите раздел **[Быстрый старт](#быстрый-старт)** выше.
