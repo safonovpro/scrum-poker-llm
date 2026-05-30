@@ -42,7 +42,7 @@ jobs:
           cd frontend
           npm run build
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL_HTTPS }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
