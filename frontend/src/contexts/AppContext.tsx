@@ -101,9 +101,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         api.getRoom(data.room_id).then(newRoom => {
           console.log('New room players:', newRoom.players);
           setRoom(newRoom);
+          // Обновляем currentPlayer если он есть
           if (currentPlayerRef.current) {
             const updatedPlayer = newRoom.players.find(p => p.id === currentPlayerRef.current!.id);
-            if (updatedPlayer) setCurrentPlayer(updatedPlayer);
+            if (updatedPlayer) {
+              console.log('Updated currentPlayer:', updatedPlayer);
+              setCurrentPlayer(updatedPlayer);
+            } else {
+              console.log('⚠️ currentPlayer not found in updated room!');
+            }
           }
         }).catch(err => console.error(err));
       }

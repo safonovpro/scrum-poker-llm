@@ -73,11 +73,17 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     if (!propRoomId || !room || room.id !== propRoomId || currentPlayer || !hasStartedLoading) return;
     
     const savedPlayerId = localStorage.getItem('currentPlayerId');
+    console.log('2nd check - savedPlayerId:', savedPlayerId);
     if (savedPlayerId) {
       const savedPlayer = room.players.find(p => p.id === savedPlayerId);
+      console.log('Found player from localStorage (2nd check):', savedPlayer);
       if (savedPlayer) {
-        console.log('Found player from localStorage (2nd check):', savedPlayer);
         setCurrentPlayer(savedPlayer);
+      } else {
+        console.warn('⚠️ Player with ID', savedPlayerId, 'not found in room players:', room.players.map(p => p.id));
+        // Очищаем localStorage если игрока нет в комнате
+        localStorage.removeItem('currentPlayerId');
+        localStorage.removeItem('currentPlayerNickname');
       }
     }
   }, [room, propRoomId, currentPlayer, setCurrentPlayer, hasStartedLoading]);
@@ -177,11 +183,16 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
 
   // Проверяем проголосовал ли игрок в текущем раунде
   const getPlayerVoteStatus = (playerId: string) => {
-    if (playerId === currentPlayer.id) {
-      return { voted: hasVoted, value: myVote };
+    const isMe = playerId === currentPlayer.id;
+    const voteData = isMe 
+      ? { voted: hasVoted, value: myVote }
+      : { voted: !!allVotes.find(v => v.player_id === playerId), value: null };
+    
+    if (isMe) {
+      console.log(`Player ${playerId} is ME, voted: ${hasVoted}`);
     }
-    const vote = allVotes.find(v => v.player_id === playerId);
-    return { voted: !!vote, value: null };
+    
+    return voteData;
   };
 
   return (
@@ -211,7 +222,12 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
       <section className="players-section">
         <h2>Участники</h2>
         <div className="players-grid">
-          {room.players.map((player) => (
+          {[...room.players].sort((a, b) => {
+            // Текущий игрок всегда первый
+            if (a.id === currentPlayer.id) return -1;
+            if (b.id === currentPlayer.id) return 1;
+            return 0;
+          }).map((player) => (
             <div
               key={player.id}
               className={`player-card ${player.id === currentPlayer.id ? 'me' : ''}`}
