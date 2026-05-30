@@ -10,7 +10,6 @@ interface RoomPageProps {
 }
 
 export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
-  const navigate = useNavigate();
   const {
     room,
     currentPlayer,
@@ -26,6 +25,8 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     loading,
     error,
   } = useApp();
+
+  const navigate = useNavigate();
 
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [hasStartedLoading, setHasStartedLoading] = useState(false);
@@ -156,8 +157,12 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     return <div className="loading">Загрузка...</div>;
   }
 
-  const isHost = currentPlayer.role === 'host';
-  const isObserver = currentPlayer.role === 'observer';
+  // После проверки выше TypeScript должен знать что room и currentPlayer не null
+  const roomData = room!;
+  const currentPlayerData = currentPlayer!;
+
+  const isHost = currentPlayerData.role === 'host';
+  const isObserver = currentPlayerData.role === 'observer';
   const hasVoted = myVote !== null;
 
   const handleStartRound = async () => {
@@ -189,6 +194,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   };
 
   const handleLeaveRoom = async () => {
+    if (!room || !currentPlayer) return;
     if (confirm('Вы уверены, что хотите покинуть комнату?')) {
       // Удаляем игрока из комнаты
       try {
@@ -209,7 +215,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
 
   // Проверяем проголосовал ли игрок в текущем раунде
   const getPlayerVoteStatus = (playerId: string) => {
-    const isMe = playerId === currentPlayer.id;
+    const isMe = playerId === currentPlayerData.id;
     const voteData = isMe 
       ? { voted: hasVoted, value: myVote }
       : { voted: !!allVotes.find(v => v.player_id === playerId), value: null };
@@ -225,13 +231,13 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     <div className="room-container">
       <header className="room-header">
         <div className="room-left">
-          <h1>{room.name}</h1>
+          <h1>{roomData.name}</h1>
           <a
-            href={`${window.location.origin}/?room=${room.id}`}
+            href={`${window.location.origin}/?room=${roomData.id}`}
             className="invite-link"
             onClick={(e) => {
               e.preventDefault();
-              navigator.clipboard.writeText(`${window.location.origin}/?room=${room.id}`);
+              navigator.clipboard.writeText(`${window.location.origin}/?room=${roomData.id}`);
               setCopySuccess(true);
               setTimeout(() => setCopySuccess(false), 2000);
             }}
@@ -240,7 +246,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
           </a>
         </div>
         <div className="room-right">
-          <span className="room-id">ID: {room.id.slice(0, 8)}...</span>
+          <span className="room-id">ID: {roomData.id.slice(0, 8)}...</span>
           <button onClick={handleLeaveRoom} className="btn-leave">
             🚪 Покинуть
           </button>
@@ -253,15 +259,15 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
       <section className="players-section">
         <h2>Участники</h2>
         <div className="players-grid">
-          {[...room.players].sort((a, b) => {
+          {[...roomData.players].sort((a, b) => {
             // Текущий игрок всегда первый
-            if (a.id === currentPlayer.id) return -1;
-            if (b.id === currentPlayer.id) return 1;
+            if (a.id === currentPlayerData.id) return -1;
+            if (b.id === currentPlayerData.id) return 1;
             return 0;
           }).map((player) => (
             <div
               key={player.id}
-              className={`player-card ${player.id === currentPlayer.id ? 'me' : ''}`}
+              className={`player-card ${player.id === currentPlayerData.id ? 'me' : ''}`}
             >
               <div className="player-info">
                 <span className={`player-role ${player.role}`}>
@@ -365,11 +371,11 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
           <div className="results-grid">
             {[...allVotes].sort((a, b) => {
               // Голос текущего игрока всегда первый
-              if (a.player_id === currentPlayer.id) return -1;
-              if (b.player_id === currentPlayer.id) return 1;
+              if (a.player_id === currentPlayerData.id) return -1;
+              if (b.player_id === currentPlayerData.id) return 1;
               return 0;
             }).map((vote) => (
-              <div key={vote.player_id} className={`result-card ${vote.player_id === currentPlayer.id ? 'me' : ''}`}>
+              <div key={vote.player_id} className={`result-card ${vote.player_id === currentPlayerData.id ? 'me' : ''}`}>
                 <span className="result-nickname">{vote.player_nickname}</span>
                 <span className="result-value">{vote.value ?? '?'}</span>
               </div>

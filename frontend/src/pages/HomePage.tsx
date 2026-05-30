@@ -3,9 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 
 export function HomePage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { createRoom, joinRoom, room } = useApp();
+  const { createRoom, joinRoom } = useApp();
   
   const [mode, setMode] = useState<'create' | 'join'>('create');
   const [roomName, setRoomName] = useState('');
