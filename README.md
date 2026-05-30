@@ -1,2 +1,192 @@
-# scrum-poker-llm
-Мини-приложение для проведения scrum-покера написанное вместе с Koda
+# Scrum Poker LLM
+
+Мини web-приложение для проведения scrum-покера написанное вместе с [CLI Koda](https://kodacode.ru/).
+
+## Основные возможности приложения
+
+1. Ведущий создаёт комнаты, проводит раунды scrum-покера и участвует в них
+2. Участники участвуют в проводимых раундах
+3. Наблюдатели могут только наблюдать за раундами
+
+### Подробней ролевая модель
+
+* Ведущий
+    1. Вход на главную страницу
+    2. Вводит название комнаты, свой псевдоним и создаёт комнату для проведения сессии scrum-покера
+    3. Копирует уникальную ссылку комнаты и рассылает её рядовым участникам
+    4. Начинает раунд (если были раунды до этого, все карты обнуляются)
+    5. Участвует в раунде путём проставления целого числа в своей карте
+    6. После завершения голосования вскрывает карты, тем самым завершая раунд
+    7. Цикл пунктов 4-6 может продолжаться бесконечно
+* Рядовой участник
+    1. Переходит по ссылке приглашения от ведущего
+    2. Вводит свой псевдоним и подключается к комнате
+    3. Участвует в раундах, организуемых ведущим
+* Наблюдатель
+    1. Переходит по ссылке приглашения от ведущего
+    2. Не вводя псевдоним, наблюдает за раундами
+
+## Стек технологий
+
+* Frontend
+    - **React** на TypeScript с минимальным набором дополнительных библиотек
+    - **shadcn/ui** в качестве основных UI-элементов
+    - **Vite** как сборщик
+* Backend
+    - **Python** как основной язык для backend-части
+    - **Flask** основной framework
+    - **SQLAlchemy** в качестве ORM
+    - **Alembic** для написания миграций
+    - **PostgreSQL** — база данных
+    - **WebSockets** (python-socketio) для синхронизации состояния в реальном времени
+
+Для локальной разработки используется **Podman** (или **Docker**).
+
+## Быстрый старт
+
+### Первый запуск
+
+```bash
+# 1. Настроить виртуальное окружение для backend
+./scripts/setup.sh
+
+# 2. Запустить PostgreSQL
+podman compose up -d
+```
+
+### Ежедневная разработка
+
+```bash
+# Запустить PostgreSQL (если не запущен)
+podman compose up -d
+
+# Запустить backend
+./scripts/run-backend.sh
+
+# Запустить frontend (в новом терминале)
+cd frontend
+npm run dev
+```
+
+Backend доступен по адресу: `http://localhost:5000`  
+Frontend доступен по адресу: `http://localhost:3000`
+
+### Деплой
+
+* **Frontend**: GitHub Pages (статический build)
+* **Backend**: VPS с Podman/Docker
+
+```bash
+# Build frontend для production
+cd frontend
+npm run build
+
+# Backend деплоится через docker-compose на VPS
+podman compose up -d --build
+```
+
+## Структура проекта
+
+```
+.
+├── frontend/              # React + Vite приложение
+│   ├── src/
+│   │   ├── components/    # UI компоненты
+│   │   ├── pages/         # Страницы приложения
+│   │   └── main.tsx       # Точка входа
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.ts
+├── backend/               # Flask API + WebSockets
+│   ├── app/
+│   │   ├── __init__.py    # Flask приложение
+│   │   ├── models.py      # SQLAlchemy модели
+│   │   └── routes.py      # API endpoints
+│   ├── alembic/           # Database migrations
+│   ├── requirements.txt
+│   └── Dockerfile
+├── llm_logs/              # Логи сессий разработки с AI
+├── scripts/               # Утилиты для разработки и деплоя
+│   ├── run-backend.sh
+│   ├── setup.sh
+│   └── deploy.sh
+├── docker-compose.yml
+├── DEPLOY.md              # Инструкция по деплою
+└── README.md
+```
+
+## Деплой
+
+Подробная инструкция по деплою на production сервер: **[DEPLOY.md](DEPLOY.md)**
+
+### Локальная разработка
+
+Смотрите раздел **[Быстрый старт](#быстрый-старт)** выше.
+
+### Деплой frontend на GitHub Pages
+
+1. В настройках репозитория включите GitHub Pages (Source: GitHub Actions)
+2. Добавьте секрет `VITE_API_URL` в Settings → Secrets and variables → Actions:
+   - Name: `VITE_API_URL`
+   - Value: URL вашего backend сервера (например: `http://your-server-ip:5000`)
+3. При push в main ветку frontend автоматически соберётся и опубликуется
+4. Сайт будет доступен по адресу: `https://your-username.github.io/scrum-poker-llm/`
+5. Обновите `homepage` в `frontend/package.json` на ваш реальный URL
+
+## API Endpoints
+
+### Комнаты
+
+| Method | Endpoint | Описание |
+|--------|----------|----------|
+| POST | `/api/rooms` | Создать комнату (body: `name`, `host_nickname`) |
+| GET | `/api/rooms/:id` | Получить информацию о комнате |
+| POST | `/api/rooms/:id/join` | Присоединиться к комнате (body: `nickname`, `role`) |
+
+### Раунды
+
+| Method | Endpoint | Описание |
+|--------|----------|----------|
+| POST | `/api/rooms/:id/rounds` | Начать раунд (body: `task_description`, `host_id`) |
+
+### Голоса
+
+| Method | Endpoint | Описание |
+|--------|----------|----------|
+| POST | `/api/rounds/:id/votes` | Проголосовать (body: `player_id`, `value`) |
+| POST | `/api/rounds/:id/reveal` | Вскрыть карты (body: `host_id`) |
+
+### WebSocket события
+
+| Событие | Направление | Описание |
+|---------|-------------|----------|
+| `connect` | client → server | Подключение клиента |
+| `disconnect` | client → server | Отключение клиента |
+| `join_room` | client → server | Подключение к комнате |
+| `leave_room` | client → server | Покидание комнаты |
+| `room_created` | server → client | Комната создана |
+| `player_joined` | server → client | Игрок присоединился |
+| `player_left` | server → client | Игрок покинул комнату |
+| `round_started` | server → client | Раунд начался |
+| `vote_cast` | server → client | Голос подан |
+| `round_revealed` | server → client | Карты вскрыты |
+
+## Логи сессий разработки
+
+В папке `llm_logs/` хранятся логи сессий разработки с AI-помощником. Файлы создаются с названием по шаблону `YYYY-MM-DD_HH:MM.md`.
+
+---
+
+## Участие AI-помощника
+
+Это приложение разработано в сотрудничестве с **Koda** — AI-помощником по программированию от команды **NLP-Core-Team**.
+
+**Koda характеристики:**
+- **Тип:** AI-ассистент для разработки ПО
+- **Язык общения:** Русский (поддерживает переключение)
+- **Специализация:** Full-stack веб-разработка, рефакторинг, отладка, архитектура
+- **Подход:** Следует best practices, подражает стилю проекта, исправляет проблемы в корневой причине
+- **Инструменты:** Редактирование файлов, запуск команд, поиск по коду, документация
+- **Особенности:** Пишет кратко и по делу, не делает commits без запроса, запускает тесты после изменений
+
+Сайт: https://kodacode.ru/
