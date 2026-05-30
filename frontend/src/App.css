@@ -222,22 +222,22 @@ body {
   background: #eff6ff;
 }
 
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .player-nickname {
   font-weight: 600;
   font-size: 1rem;
 }
 
 .player-role {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  background: var(--bg);
-  width: fit-content;
-}
-
-.player-role.host {
-  background: #fef3c7;
-  color: #92400e;
+  font-size: 1rem;
+  padding: 0;
+  background: none;
+  width: auto;
 }
 
 .player-card .vote-status {

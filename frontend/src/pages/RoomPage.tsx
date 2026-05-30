@@ -216,21 +216,23 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               key={player.id}
               className={`player-card ${player.id === currentPlayer.id ? 'me' : ''}`}
             >
-              <span className="player-nickname">{player.nickname}</span>
-              <span className={`player-role ${player.role}`}>
-                {player.role === 'host' ? '👑 Ведущий' : 
-                 player.role === 'observer' ? '👁 Наблюдатель' : '👤 Игрок'}
-              </span>
-              {activeRound && (
-                <span className="vote-status">
-                  {player.role !== 'observer' && (
-                    <VoteIndicator 
-                      playerId={player.id} 
-                      getPlayerVoteStatus={getPlayerVoteStatus}
-                    />
-                  )}
+              <div className="player-info">
+                <span className={`player-role ${player.role}`}>
+                  {player.role === 'host' ? '👑' : 
+                   player.role === 'observer' ? '👁️' : '👤'}
                 </span>
-              )}
+                <span className="player-nickname">{player.nickname}</span>
+                {activeRound && (
+                  <span className="vote-status">
+                    {player.role !== 'observer' && (
+                      <VoteIndicator 
+                        playerId={player.id} 
+                        getPlayerVoteStatus={getPlayerVoteStatus}
+                      />
+                    )}
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>
