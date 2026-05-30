@@ -305,8 +305,8 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               const average = calculateAverage(allVotes);
               return (median !== null || average !== null) ? (
                 <>
-                  {median !== null && <span className="median-value">Медиана: {median}</span>}
-                  {average !== null && <span className="median-value">Среднее: {average}</span>}
+                  {median !== null && <span className="median-value">Медиана — {median}</span>}
+                  {average !== null && <span className="median-value">Среднее — {average}</span>}
                 </>
               ) : null;
             })()}
