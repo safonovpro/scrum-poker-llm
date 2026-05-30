@@ -217,7 +217,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       
       // Обновляем URL с room_id (HashRouter format)
-      window.history.pushState({}, '', `/#/room/${data.room_id}`);
+      window.location.hash = `#/room/${data.room_id}`;
       
       setLoading(false);
     } catch (err: any) {
@@ -245,7 +245,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       
       // Обновляем URL с room_id (HashRouter format)
-      window.history.pushState({}, '', `/#/room/${roomId}`);
+      window.location.hash = `#/room/${roomId}`;
       
       setLoading(false);
     } catch (err: any) {

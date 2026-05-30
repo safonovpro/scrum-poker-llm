@@ -29,11 +29,12 @@ export function HomePage() {
     setLoading(true);
     try {
       await createRoom(roomName, nickname);
-      // createRoom уже обновляет URL через window.history.pushState
+      // createRoom уже обновляет URL через window.location.hash
       // Перезагружаем страницу чтобы загрузить комнату
       const roomParam = searchParams.get('room');
       if (roomParam) {
-        window.location.href = `/#/room/${roomParam}`;
+        window.location.hash = `#/room/${roomParam}`;
+        window.location.reload();
       } else {
         // Ждём когда room обновится в контексте
         setTimeout(() => {
