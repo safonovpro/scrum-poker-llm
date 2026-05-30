@@ -28,7 +28,6 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
 
   const [taskDescription, setTaskDescription] = useState('');
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
-  const [showRevealConfirm, setShowRevealConfirm] = useState(false);
   const [hasStartedLoading, setHasStartedLoading] = useState(false);
 
   // Загружаем комнату и currentPlayer по roomId из URL при монтировании
@@ -169,7 +168,6 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   const handleReveal = async () => {
     try {
       await revealVotes();
-      setShowRevealConfirm(false);
     } catch (err) {
       console.error(err);
     }
@@ -270,11 +268,9 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               {CARDS.map((card) => (
                 <button
                   key={card}
-                  className={`card ${selectedCard === card ? 'selected' : ''} ${
-                    hasVoted && !allVotes.find(v => v.player_id === currentPlayer.id) ? 'voted' : ''
-                  }`}
+                  className={`card ${selectedCard === card ? 'selected' : ''}`}
                   onClick={() => handleVote(typeof card === 'number' ? card : null)}
-                  disabled={hasVoted}
+                  disabled={false}
                 >
                   {card}
                 </button>
@@ -288,27 +284,13 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
             </div>
           )}
 
-          {isHost && !showRevealConfirm && (
+          {isHost && (
             <button
-              onClick={() => setShowRevealConfirm(true)}
+              onClick={handleReveal}
               className="btn-primary"
             >
               Вскрыть карты
             </button>
-          )}
-
-          {showRevealConfirm && (
-            <div className="confirm-dialog">
-              <p>Вы уверены, что хотите вскрыть карты?</p>
-              <div className="confirm-buttons">
-                <button onClick={handleReveal} className="btn-primary">
-                  Да, вскрыть
-                </button>
-                <button onClick={() => setShowRevealConfirm(false)} className="btn-secondary">
-                  Отмена
-                </button>
-              </div>
-            </div>
           )}
         </section>
       )}
