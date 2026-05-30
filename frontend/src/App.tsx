@@ -13,12 +13,26 @@ function App() {
   return (
     <AppProvider>
       <HashRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/room/:roomId" element={<RoomPageWrapper />} />
-          <Route path="/room" element={<Navigate to="/" replace />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <div className="app-wrapper">
+          <main className="app-main">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/room/:roomId" element={<RoomPageWrapper />} />
+              <Route path="/room" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+          <footer className="app-footer">
+            <a
+              href="https://github.com/safonovpro/scrum-poker-llm"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              Репозиторий проекта на GitHub
+            </a>
+          </footer>
+        </div>
       </HashRouter>
     </AppProvider>
   );

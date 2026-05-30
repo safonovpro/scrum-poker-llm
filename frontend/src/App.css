@@ -447,6 +447,34 @@ body {
   color: var(--primary);
 }
 
+/* App Layout */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 1rem;
+  padding-right: 2rem;
+}
+
+.footer-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: var(--primary);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .home-container,
