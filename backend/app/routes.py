@@ -141,6 +141,30 @@ def join_room(room_id):
 
 # ==================== Rounds ====================
 
+@bp.route('/rooms/<room_id>/players/<player_id>', methods=['DELETE'])
+def leave_room(room_id, player_id):
+    """Покинуть комнату"""
+    room = Room.query.get(room_id)
+    
+    if not room:
+        return jsonify({'error': 'Room not found'}), 404
+    
+    player = Player.query.get(player_id)
+    if not player or player.room_id != room_id:
+        return jsonify({'error': 'Player not found in this room'}), 404
+    
+    db.session.delete(player)
+    db.session.commit()
+    
+    # Уведомить остальных
+    socketio.emit('player_left', {
+        'player_ids': [player_id],
+        'room_id': room_id
+    }, room=room_id)
+    
+    return jsonify({'success': True})
+
+
 @bp.route('/rooms/<room_id>/rounds', methods=['POST'])
 def start_round(room_id):
     """Начать новый раунд (только ведущий)"""

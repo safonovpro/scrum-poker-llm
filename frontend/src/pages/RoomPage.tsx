@@ -188,6 +188,24 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     }
   };
 
+  const handleLeaveRoom = async () => {
+    if (confirm('Вы уверены, что хотите покинуть комнату?')) {
+      // Удаляем игрока из комнаты
+      try {
+        await fetch(`/api/rooms/${room.id}/players/${currentPlayer.id}`, {
+          method: 'DELETE'
+        });
+      } catch (err) {
+        console.error('Failed to leave room:', err);
+      }
+      // Очищаем localStorage
+      localStorage.removeItem('currentPlayerId');
+      localStorage.removeItem('currentPlayerNickname');
+      // Перенаправляем на главную
+      navigate('/');
+    }
+  };
+
   // Проверяем проголосовал ли игрок в текущем раунде
   const getPlayerVoteStatus = (playerId: string) => {
     const isMe = playerId === currentPlayer.id;
@@ -205,9 +223,8 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   return (
     <div className="room-container">
       <header className="room-header">
-        <h1>{room.name}</h1>
-        <div className="room-info">
-          <span>ID: {room.id.slice(0, 8)}...</span>
+        <div className="room-left">
+          <h1>{room.name}</h1>
           <a
             href={`${window.location.origin}/?room=${room.id}`}
             className="invite-link"
@@ -218,8 +235,14 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               setTimeout(() => setCopySuccess(false), 2000);
             }}
           >
-            {copySuccess ? '✅ Скопировано!' : 'Копировать ссылку'}
+            {copySuccess ? '✅ Скопировано!' : '🔗 Ссылка'}
           </a>
+        </div>
+        <div className="room-right">
+          <span className="room-id">ID: {room.id.slice(0, 8)}...</span>
+          <button onClick={handleLeaveRoom} className="btn-leave">
+            🚪 Покинуть
+          </button>
         </div>
       </header>
 
