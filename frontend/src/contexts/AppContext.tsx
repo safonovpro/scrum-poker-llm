@@ -68,7 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Инициализация WebSocket
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_API_URL_HTTPS || '/';
+    const socketUrl = import.meta.env.VITE_API_URL || '/';
     const socketInstance = io(socketUrl, {
       transports: ['polling'],
       autoConnect: true,

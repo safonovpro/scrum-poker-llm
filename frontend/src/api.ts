@@ -7,11 +7,11 @@ import {
   RevealData,
 } from './types';
 
-const API_BASE = import.meta.env.VITE_API_URL_HTTPS || '';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 // Debug: показать какой API URL используется
 console.log('API_BASE:', API_BASE);
-console.log('VITE_API_URL_HTTPS:', import.meta.env.VITE_API_URL_HTTPS);
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
 
 export const api = {
   // Комнаты
