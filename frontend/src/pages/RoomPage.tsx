@@ -313,8 +313,8 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
         </section>
       )}
 
-      {/* Результаты */}
-      {allVotes.length > 0 && (
+      {/* Результаты - показываем только после вскрытия карт */}
+      {!activeRound && allVotes.length > 0 && (
         <section className="results-section">
           <h2>Результаты</h2>
           <div className="results-grid">
