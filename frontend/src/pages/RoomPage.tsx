@@ -30,6 +30,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [hasStartedLoading, setHasStartedLoading] = useState(false);
   const [taskDescription, setTaskDescription] = useState('');
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Загружаем комнату и currentPlayer по roomId из URL при монтировании
   useEffect(() => {
@@ -195,10 +196,11 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
             onClick={(e) => {
               e.preventDefault();
               navigator.clipboard.writeText(`${window.location.origin}/?room=${room.id}`);
-              alert('Ссылка скопирована!');
+              setCopySuccess(true);
+              setTimeout(() => setCopySuccess(false), 2000);
             }}
           >
-            Копировать ссылку
+            {copySuccess ? '✅ Скопировано!' : 'Копировать ссылку'}
           </a>
         </div>
       </header>
