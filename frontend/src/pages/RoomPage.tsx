@@ -198,7 +198,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     if (confirm('Вы уверены, что хотите покинуть комнату?')) {
       // Удаляем игрока из комнаты
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || '';
+        const API_BASE = import.meta.env.VITE_API_URL_HTTPS || '';
         await fetch(`${API_BASE}/api/rooms/${room.id}/players/${currentPlayer.id}`, {
           method: 'DELETE'
         });
