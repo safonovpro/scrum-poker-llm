@@ -9,3 +9,4 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       DATABASE_URL: ${DATABASE_URL}
     restart: unless-stopped
+    network_mode: host
