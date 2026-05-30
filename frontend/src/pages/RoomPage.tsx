@@ -68,6 +68,13 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     });
   }, [propRoomId, hasStartedLoading]);
 
+  // Сбрасываем выделение карты при начале нового раунда
+  useEffect(() => {
+    if (activeRound) {
+      setSelectedCard(null);
+    }
+  }, [activeRound]);
+
   // Отдельный эффект для поиска currentPlayer после загрузки комнаты
   useEffect(() => {
     if (!propRoomId || !room || room.id !== propRoomId || currentPlayer || !hasStartedLoading) return;
