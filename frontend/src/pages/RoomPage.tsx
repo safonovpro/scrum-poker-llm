@@ -175,6 +175,15 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     }
   };
 
+  // Проверяем проголосовал ли игрок в текущем раунде
+  const getPlayerVoteStatus = (playerId: string) => {
+    if (playerId === currentPlayer.id) {
+      return { voted: hasVoted, value: myVote };
+    }
+    const vote = allVotes.find(v => v.player_id === playerId);
+    return { voted: !!vote, value: null };
+  };
+
   return (
     <div className="room-container">
       <header className="room-header">
@@ -214,7 +223,10 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               {activeRound && (
                 <span className="vote-status">
                   {player.role !== 'observer' && (
-                    <VoteIndicator playerId={player.id} votes={allVotes} />
+                    <VoteIndicator 
+                      playerId={player.id} 
+                      getPlayerVoteStatus={getPlayerVoteStatus}
+                    />
                   )}
                 </span>
               )}
@@ -319,11 +331,11 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   );
 }
 
-function VoteIndicator({ playerId, votes }: { playerId: string; votes: FullVote[] }) {
-  const myVoteData = votes.find(v => v.player_id === playerId);
+function VoteIndicator({ playerId, getPlayerVoteStatus }: { playerId: string; getPlayerVoteStatus: (id: string) => { voted: boolean; value: number | null } }) {
+  const voteData = getPlayerVoteStatus(playerId);
   
-  if (myVoteData) {
-    return <span className="voted">{myVoteData.value ?? '?'}</span>;
+  if (voteData.voted) {
+    return <span className="voted">✓</span>;
   }
   
   return <span className="not-voted">⏳</span>;

@@ -114,6 +114,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setActiveRound(data.round_id);
         setMyVote(null);
         setAllVotes([]);
+        
+        // Обновляем room чтобы включить новые записи голосов
+        api.getRoom(data.room_id).then(newRoom => {
+          setRoom(newRoom);
+        }).catch(err => console.error(err));
       }
     });
 
@@ -121,9 +126,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.log('Vote cast:', data);
       const currentRoom = roomRef.current;
       if (currentRoom && currentRoom.id === data.room_id) {
+        // Добавляем/обновляем голос в allVotes
+        setAllVotes(prevVotes => {
+          const exists = prevVotes.find(v => v.player_id === data.player_id);
+          if (exists) {
+            return prevVotes; // Значения всё равно скрыты до раскрытия
+          }
+          // Добавляем нового проголосовавшего
+          const player = currentRoom.players.find(p => p.id === data.player_id);
+          return [...prevVotes, {
+            player_id: data.player_id,
+            player_nickname: player?.nickname || 'Unknown',
+            value: null
+          }];
+        });
+        
         api.getRoom(data.room_id).then(newRoom => {
           setRoom(newRoom);
-          // Обновим currentPlayer если он есть
           if (currentPlayerRef.current) {
             const updatedPlayer = newRoom.players.find(p => p.id === currentPlayerRef.current!.id);
             if (updatedPlayer) setCurrentPlayer(updatedPlayer);
@@ -229,6 +248,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const roomData = await api.getRoom(roomId);
       setRoom(roomData);
+      
+      // Найти активный раунд из загруженных данных
+      const active = roomData.recent_rounds.find(r => r.is_active);
+      setActiveRound(active?.id || null);
+      
+      // Обновить голоса если есть активный раунд
+      if (active) {
+        const votes = active.votes || [];
+        // Показываем только что кто-то проголосовал (без значений до раскрытия)
+        setAllVotes(votes.map((v: VoteStatus) => ({
+          player_id: v.player_id,
+          player_nickname: roomData.players.find(p => p.id === v.player_id)?.nickname || 'Unknown',
+          value: null // До раскрытия значения скрыты
+        })));
+      } else {
+        setAllVotes([]);
+      }
     } catch (err: any) {
       console.error('Failed to load room:', err);
       throw err;
