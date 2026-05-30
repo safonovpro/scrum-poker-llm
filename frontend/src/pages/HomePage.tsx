@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 
 export function HomePage() {
   const { createRoom, joinRoom } = useApp();
+  const [searchParams] = useSearchParams();
   
   const [mode, setMode] = useState<'create' | 'join'>('create');
   const [roomName, setRoomName] = useState('');
