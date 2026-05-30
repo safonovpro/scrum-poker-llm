@@ -401,6 +401,11 @@ body {
   gap: 0.5rem;
 }
 
+.result-card.me {
+  background: #eff6ff;
+  border: 2px solid var(--primary);
+}
+
 .result-nickname {
   font-weight: 500;
   font-size: 0.875rem;

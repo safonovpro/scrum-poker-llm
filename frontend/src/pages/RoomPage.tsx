@@ -332,8 +332,13 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
             })()}
           </h2>
           <div className="results-grid">
-            {allVotes.map((vote) => (
-              <div key={vote.player_id} className="result-card">
+            {[...allVotes].sort((a, b) => {
+              // Голос текущего игрока всегда первый
+              if (a.player_id === currentPlayer.id) return -1;
+              if (b.player_id === currentPlayer.id) return 1;
+              return 0;
+            }).map((vote) => (
+              <div key={vote.player_id} className={`result-card ${vote.player_id === currentPlayer.id ? 'me' : ''}`}>
                 <span className="result-nickname">{vote.player_nickname}</span>
                 <span className="result-value">{vote.value ?? '?'}</span>
               </div>
