@@ -123,6 +123,16 @@ podman compose up -d --build
 
 Смотрите раздел **[Быстрый старт](#быстрый-старт)** выше.
 
+### Деплой frontend на GitHub Pages
+
+1. В настройках репозитория включите GitHub Pages (Source: GitHub Actions)
+2. Добавьте секрет `VITE_API_URL` в Settings → Secrets and variables → Actions:
+   - Name: `VITE_API_URL`
+   - Value: URL вашего backend сервера (например: `http://your-server-ip:5000`)
+3. При push в main ветку frontend автоматически соберётся и опубликуется
+4. Сайт будет доступен по адресу: `https://your-username.github.io/scrum-poker-llm/`
+5. Обновите `homepage` в `frontend/package.json` на ваш реальный URL
+
 ## API Endpoints
 
 ### Комнаты
