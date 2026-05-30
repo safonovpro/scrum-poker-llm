@@ -298,7 +298,15 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
       {/* Результаты - показываем только после вскрытия карт */}
       {!activeRound && allVotes.length > 0 && (
         <section className="results-section">
-          <h2>Результаты</h2>
+          <h2>
+            Результаты
+            {(() => {
+              const median = calculateMedian(allVotes);
+              return median !== null ? (
+                <span className="median-value">Медиана: {median}</span>
+              ) : null;
+            })()}
+          </h2>
           <div className="results-grid">
             {allVotes.map((vote) => (
               <div key={vote.player_id} className="result-card">
@@ -321,4 +329,23 @@ function VoteIndicator({ playerId, getPlayerVoteStatus }: { playerId: string; ge
   }
   
   return <span className="not-voted">⏳</span>;
+}
+
+function calculateMedian(votes: FullVote[]): number | null {
+  const values = votes
+    .map(v => v.value)
+    .filter((v): v is number => v !== null)
+    .sort((a, b) => a - b);
+  
+  if (values.length === 0) return null;
+  
+  const mid = Math.floor(values.length / 2);
+  
+  if (values.length % 2 === 0) {
+    // Чётное количество - берём большее из двух средних
+    return Math.max(values[mid - 1], values[mid]);
+  } else {
+    // Нечётное количество - берём среднее
+    return values[mid];
+  }
 }

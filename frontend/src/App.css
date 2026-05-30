@@ -370,6 +370,19 @@ body {
 .results-section h2 {
   margin-bottom: 1rem;
   font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.median-value {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--primary);
+  background: #eff6ff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
 }
 
 .results-grid {

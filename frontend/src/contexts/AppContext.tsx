@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { api } from '../api';
-import { Room, Player, FullVote } from '../types';
+import { Room, Player, FullVote, VoteStatus } from '../types';
 
 interface AppContextType {
   room: Room | null;
