@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
- backend:
+  backend:
     build: ./backend
     ports:
       - "5000:5000"
     environment:
       FLASK_APP: app
       FLASK_ENV: production
-      SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-scrum_poker}:${POSTGRES_PASSWORD:-scrum_poker_password}@db:5432/${POSTGRES_DB:-scrum_poker}
+      SECRET_KEY: ${SECRET_KEY}
+      DATABASE_URL: ${DATABASE_URL}
     restart: unless-stopped
