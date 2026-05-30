@@ -216,8 +216,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('currentPlayerNickname', hostNickname);
       }
       
-      // Обновляем URL с room_id
-      window.history.pushState({}, '', `/room/${data.room_id}`);
+      // Обновляем URL с room_id (HashRouter format)
+      window.history.pushState({}, '', `/#/room/${data.room_id}`);
       
       setLoading(false);
     } catch (err: any) {
@@ -244,8 +244,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('currentPlayerNickname', nickname);
       }
       
-      // Обновляем URL с room_id
-      window.history.pushState({}, '', `/room/${roomId}`);
+      // Обновляем URL с room_id (HashRouter format)
+      window.history.pushState({}, '', `/#/room/${roomId}`);
       
       setLoading(false);
     } catch (err: any) {

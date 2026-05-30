@@ -233,16 +233,16 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
         <div className="room-left">
           <h1>{roomData.name}</h1>
           <a
-            href={`${window.location.origin}/?room=${roomData.id}`}
+            href={`${window.location.origin}${window.location.pathname}/#/?room=${roomData.id}`}
             className="invite-link"
             onClick={(e) => {
               e.preventDefault();
-              navigator.clipboard.writeText(`${window.location.origin}/?room=${roomData.id}`);
+              navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}/#/?room=${roomData.id}`);
               setCopySuccess(true);
               setTimeout(() => setCopySuccess(false), 2000);
             }}
           >
-            {copySuccess ? '✅ Скопировано!' : '🔗 Скопировать ссылку'}
+            {copySuccess ? '✅ Скопировано!' : '🔗 Ссылка'}
           </a>
         </div>
         <div className="room-right">

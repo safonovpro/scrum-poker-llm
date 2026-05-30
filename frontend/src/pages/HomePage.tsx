@@ -33,7 +33,7 @@ export function HomePage() {
       // Перезагружаем страницу чтобы загрузить комнату
       const roomParam = searchParams.get('room');
       if (roomParam) {
-        window.location.href = `/room/${roomParam}`;
+        window.location.href = `/#/room/${roomParam}`;
       } else {
         // Ждём когда room обновится в контексте
         setTimeout(() => {
