@@ -102,12 +102,41 @@ podman compose up -d --build
 │   │   ├── __init__.py    # Flask приложение
 │   │   ├── models.py      # SQLAlchemy модели
 │   │   └── routes.py      # API endpoints
+│   ├── alembic/           # Database migrations
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── llm_logs/              # Логи сессий разработки с AI
+├── scripts/               # Утилиты для разработки и деплоя
+│   ├── run-backend.sh
+│   ├── setup.sh
+│   └── deploy.sh
 ├── docker-compose.yml
+├── DEPLOY.md              # Инструкция по деплою
 └── README.md
 ```
+
+## Деплой
+
+Подробная инструкция по деплою на production сервер: **[DEPLOY.md](DEPLOY.md)**
+
+### Быстрый старт на сервере
+
+```bash
+# 1. Клонировать репозиторий
+git clone <your-repo-url>
+cd scrum-poker-llm
+
+# 2. Настроить окружение
+cp .env.example .env
+nano .env  # Изменить пароли и ключи
+
+# 3. Запустить
+./scripts/deploy.sh
+```
+
+### Локальная разработка
+
+Смотрите раздел **[Быстрый старт](#быстрый-старт)** выше.
 
 ## API Endpoints
 
