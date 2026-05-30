@@ -49,13 +49,13 @@ nano .env
 docker compose build
 
 # Start services
-docker compose up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # Check status
 docker compose ps
 
 # View logs
-docker compose logs -f backend
+docker compose -f docker-compose.prod.yml logs -f backend
 ```
 
 #### 5. Database Migrations
