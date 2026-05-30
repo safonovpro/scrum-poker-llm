@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { FullVote } from '../types';
 
-const CARDS = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, '?'];
+const CARDS = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, '?'];
 
 interface RoomPageProps {
   roomId?: string;
