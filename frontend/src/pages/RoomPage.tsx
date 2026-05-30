@@ -242,7 +242,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               setTimeout(() => setCopySuccess(false), 2000);
             }}
           >
-            {copySuccess ? '✅ Скопировано!' : '🔗 Ссылка'}
+            {copySuccess ? '✅ Скопировано!' : '🔗 Скопировать ссылку'}
           </a>
         </div>
         <div className="room-right">
