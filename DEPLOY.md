@@ -12,20 +12,9 @@
 
 #### 1. Install Docker and Docker Compose
 
+Use instruction by [link](https://docs.docker.com/engine/install/ubuntu/).
+
 ```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
-
-# Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-
-# Add user to docker group
-sudo usermod -aG docker $USER
-
-# Install Docker Compose
-sudo apt install docker-compose-plugin -y
-
 # Verify installation
 docker --version
 docker compose version
