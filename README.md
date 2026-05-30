@@ -2,6 +2,8 @@
 
 Мини web-приложение для проведения scrum-покера написанное вместе с [CLI Koda](https://kodacode.ru/).
 
+Приложение доступно по адресу [safonovpro.github.io/scrum-poker-llm](https://safonovpro.github.io/scrum-poker-llm)
+
 ## Основные возможности приложения
 
 1. Ведущий создаёт комнаты, проводит раунды scrum-покера и участвует в них
