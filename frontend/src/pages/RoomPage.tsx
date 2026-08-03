@@ -5,6 +5,37 @@ import { FullVote } from '../types';
 
 const CARDS = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, '?'];
 
+// 100 весёлых эмодзи для персонализации
+const PLAYER_ICONS = [
+  '🦊', '🐼', '🦄', '🐨', '🦁', '🐸', '🦉', '🐙', '🦋', '🐢',
+  '🦈', '🐳', '🦜', '🐝', '🦩', '🐘', '🦒', '🐊', '🦎', '🐬',
+  '🦚', '🦆', '🦃', '🦢', '🐇', '🐿️', '🦝', '🦫', '🐁', '🐀',
+  '🦭', '🐉', '🦖', '🐋', '🦂', '🐍', '🦀', '🐡', '🐠', '🐟',
+  '🐬', '🦈', '🐙', '🦑', '🦪', '🦐', '🦞', '🐚', '🌵', '🎋',
+  '🌻', '🌹', '🍀', '🍄', '🌸', '☀️', '🌙', '⭐', '🔥', '❄️',
+  '🌊', '🍕', '🍔', '🍟', '🌮', '🍩', '🧁', '🍪', '🎂', '🍰',
+  '🎸', '🥁', '🎺', '🎷', '🎹', '🎻', '🪕', '🪘', '🎤', '🎧',
+  '🎮', '🕹️', '🎯', '🎲', '🎳', '🏀', '⚽', '🎾', '🏈', '🥎',
+  '🚀', '🛸', '✈️', '🚁', '🎈', '🎉', '🎊', '🎁', '🎀', '🎗️',
+  '💎', '🔮', '🧿', '🪄', '🪬', '🧸', '🪅', '🪩', '🧬', '🧪'
+];
+
+// Хэш-функция для определения индекса иконки по нику
+function getPlayerIconIndex(nickname: string): number {
+  let hash = 0;
+  for (let i = 0; i < nickname.length; i++) {
+    const char = nickname.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Преобразуем в 32-битное целое
+  }
+  return Math.abs(hash) % PLAYER_ICONS.length;
+}
+
+// Получить иконку игрока по нику
+function getPlayerIcon(nickname: string): string {
+  return PLAYER_ICONS[getPlayerIconIndex(nickname)];
+}
+
 interface RoomPageProps {
   roomId?: string;
 }
@@ -32,6 +63,8 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   const [hasStartedLoading, setHasStartedLoading] = useState(false);
   const [taskDescription, setTaskDescription] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
+  const [playedWinSound, setPlayedWinSound] = useState(false);
+  const [loadTimeout, setLoadTimeout] = useState(false);
 
   // Загружаем комнату и currentPlayer по roomId из URL при монтировании
   useEffect(() => {
@@ -97,7 +130,6 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   }, [room, propRoomId, currentPlayer, setCurrentPlayer, hasStartedLoading]);
     
   // Таймаут для проверки загрузки комнаты (чтобы не делать навигацию слишком рано)
-  const [loadTimeout, setLoadTimeout] = useState(false);
   useEffect(() => {
     if (hasStartedLoading && !loadTimeout) {
       const timeout = setTimeout(() => {
@@ -153,6 +185,29 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     console.log('Waiting...');
   }, [propRoomId, room, currentPlayer, navigate, hasStartedLoading, loadTimeout]);
 
+  // Воспроизводим звук при совпадении медианы и среднего
+  useEffect(() => {
+    if (!allVotes.length || playedWinSound) return;
+    
+    const median = calculateMedian(allVotes);
+    const average = calculateAverage(allVotes);
+    
+    if (median !== null && average !== null && median === average) {
+      setPlayedWinSound(true);
+      const audio = new Audio('/win-win.mp4');
+      audio.play().catch(() => {
+        // Игнорируем ошибки автовоспроизведения (например, если браузер блокирует)
+      });
+    }
+  }, [allVotes, playedWinSound]);
+
+  // Сбрасываем флаг при начале нового раунда
+  useEffect(() => {
+    if (!activeRound) {
+      setPlayedWinSound(false);
+    }
+  }, [activeRound]);
+
   if (!hasStartedLoading || (!room && !loadTimeout) || !currentPlayer) {
     return <div className="loading">Загрузка...</div>;
   }
@@ -163,7 +218,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
 
   const isHost = currentPlayerData.role === 'host';
   const isObserver = currentPlayerData.role === 'observer';
-  const hasVoted = myVote !== null;
+  const hasVoted = allVotes.some(v => v.player_id === currentPlayerData.id);
 
   const handleStartRound = async () => {
     try {
@@ -176,7 +231,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   };
 
   const handleVote = async (value: number | null) => {
-    if (value === null || !activeRound) return;
+    if (!activeRound) return;
     try {
       await castVote(value);
       setSelectedCard(value);
@@ -272,7 +327,8 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               <div className="player-info">
                 <span className={`player-role ${player.role}`}>
                   {player.role === 'host' ? '👑' : 
-                   player.role === 'observer' ? '👁️' : '👤'}
+                   player.role === 'observer' ? '👁️' : 
+                   getPlayerIcon(player.nickname)}
                 </span>
                 <span className="player-nickname">{player.nickname}</span>
                 {activeRound && (
@@ -337,7 +393,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
 
           {hasVoted && (
             <div className="vote-confirmed">
-              ✅ Вы выбрали карту {myVote}
+              ✅ Вы выбрали карту {myVote ?? '?'}
             </div>
           )}
 
@@ -360,12 +416,20 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
             {(() => {
               const median = calculateMedian(allVotes);
               const average = calculateAverage(allVotes);
-              return (median !== null || average !== null) ? (
+              if (median === null && average === null) return null;
+              
+              // Если медиана и среднее совпали
+              if (median !== null && average !== null && median === average) {
+                return <span className="median-value match">😎 Медиана и среднее — {median}</span>;
+              }
+              
+              // Иначе показываем отдельно
+              return (
                 <>
                   {median !== null && <span className="median-value">Медиана — {median}</span>}
                   {average !== null && <span className="median-value">Среднее — {average}</span>}
                 </>
-              ) : null;
+              );
             })()}
           </h2>
           <div className="results-grid">
