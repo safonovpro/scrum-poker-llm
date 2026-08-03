@@ -63,6 +63,8 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   const [hasStartedLoading, setHasStartedLoading] = useState(false);
   const [taskDescription, setTaskDescription] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
+  const [playedWinSound, setPlayedWinSound] = useState(false);
+  const [loadTimeout, setLoadTimeout] = useState(false);
 
   // Загружаем комнату и currentPlayer по roomId из URL при монтировании
   useEffect(() => {
@@ -128,7 +130,6 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   }, [room, propRoomId, currentPlayer, setCurrentPlayer, hasStartedLoading]);
     
   // Таймаут для проверки загрузки комнаты (чтобы не делать навигацию слишком рано)
-  const [loadTimeout, setLoadTimeout] = useState(false);
   useEffect(() => {
     if (hasStartedLoading && !loadTimeout) {
       const timeout = setTimeout(() => {
@@ -183,6 +184,29 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     // Иначе ждём
     console.log('Waiting...');
   }, [propRoomId, room, currentPlayer, navigate, hasStartedLoading, loadTimeout]);
+
+  // Воспроизводим звук при совпадении медианы и среднего
+  useEffect(() => {
+    if (!allVotes.length || playedWinSound) return;
+    
+    const median = calculateMedian(allVotes);
+    const average = calculateAverage(allVotes);
+    
+    if (median !== null && average !== null && median === average) {
+      setPlayedWinSound(true);
+      const audio = new Audio('/win-win.mp4');
+      audio.play().catch(() => {
+        // Игнорируем ошибки автовоспроизведения (например, если браузер блокирует)
+      });
+    }
+  }, [allVotes, playedWinSound]);
+
+  // Сбрасываем флаг при начале нового раунда
+  useEffect(() => {
+    if (!activeRound) {
+      setPlayedWinSound(false);
+    }
+  }, [activeRound]);
 
   if (!hasStartedLoading || (!room && !loadTimeout) || !currentPlayer) {
     return <div className="loading">Загрузка...</div>;
