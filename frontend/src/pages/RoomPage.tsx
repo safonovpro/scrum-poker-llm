@@ -194,7 +194,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
     
     if (median !== null && average !== null && median === average) {
       setPlayedWinSound(true);
-      const audio = new Audio('/win-win.mp4');
+      const audio = new Audio(`${import.meta.env.BASE_URL}win-win.mp4`);
       audio.play().catch(() => {
         // Игнорируем ошибки автовоспроизведения (например, если браузер блокирует)
       });

@@ -40,7 +40,7 @@ jobs:
       - name: Build
         run: |
           cd frontend
-          npm run build -- --base=/scrum-poker-llm/
+          npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
