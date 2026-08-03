@@ -415,6 +415,11 @@ body {
   border-radius: 6px;
 }
 
+.median-value.match {
+  color: var(--success);
+  background: #dcfce7;
+}
+
 .results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

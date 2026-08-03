@@ -392,12 +392,20 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
             {(() => {
               const median = calculateMedian(allVotes);
               const average = calculateAverage(allVotes);
-              return (median !== null || average !== null) ? (
+              if (median === null && average === null) return null;
+              
+              // Если медиана и среднее совпали
+              if (median !== null && average !== null && median === average) {
+                return <span className="median-value match">😎 Медиана и среднее — {median}</span>;
+              }
+              
+              // Иначе показываем отдельно
+              return (
                 <>
                   {median !== null && <span className="median-value">Медиана — {median}</span>}
                   {average !== null && <span className="median-value">Среднее — {average}</span>}
                 </>
-              ) : null;
+              );
             })()}
           </h2>
           <div className="results-grid">
