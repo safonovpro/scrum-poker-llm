@@ -20,7 +20,7 @@ interface AppContextType {
   loadRoom: (roomId: string) => Promise<void>;
   setCurrentPlayer: (player: Player | null) => void;
   startRound: (taskDescription: string) => Promise<void>;
-  castVote: (value: number) => Promise<void>;
+  castVote: (value: number | null) => Promise<void>;
   revealVotes: () => Promise<void>;
   refreshRoom: () => Promise<void>;
 }
@@ -293,7 +293,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const castVote = async (value: number) => {
+  const castVote = async (value: number | null) => {
     if (!activeRound || !currentPlayer) return;
     try {
       await api.castVote(activeRound, { player_id: currentPlayer.id, value });

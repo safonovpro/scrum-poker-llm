@@ -163,7 +163,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
 
   const isHost = currentPlayerData.role === 'host';
   const isObserver = currentPlayerData.role === 'observer';
-  const hasVoted = myVote !== null;
+  const hasVoted = allVotes.some(v => v.player_id === currentPlayerData.id);
 
   const handleStartRound = async () => {
     try {
@@ -176,7 +176,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
   };
 
   const handleVote = async (value: number | null) => {
-    if (value === null || !activeRound) return;
+    if (!activeRound) return;
     try {
       await castVote(value);
       setSelectedCard(value);
@@ -337,7 +337,7 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
 
           {hasVoted && (
             <div className="vote-confirmed">
-              ✅ Вы выбрали карту {myVote}
+              ✅ Вы выбрали карту {myVote ?? '?'}
             </div>
           )}
 
