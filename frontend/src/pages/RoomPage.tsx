@@ -5,6 +5,37 @@ import { FullVote } from '../types';
 
 const CARDS = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, '?'];
 
+// 100 весёлых эмодзи для персонализации
+const PLAYER_ICONS = [
+  '🦊', '🐼', '🦄', '🐨', '🦁', '🐸', '🦉', '🐙', '🦋', '🐢',
+  '🦈', '🐳', '🦜', '🐝', '🦩', '🐘', '🦒', '🐊', '🦎', '🐬',
+  '🦚', '🦆', '🦃', '🦢', '🐇', '🐿️', '🦝', '🦫', '🐁', '🐀',
+  '🦭', '🐉', '🦖', '🐋', '🦂', '🐍', '🦀', '🐡', '🐠', '🐟',
+  '🐬', '🦈', '🐙', '🦑', '🦪', '🦐', '🦞', '🐚', '🌵', '🎋',
+  '🌻', '🌹', '🍀', '🍄', '🌈', '☀️', '🌙', '⭐', '🔥', '❄️',
+  '🌊', '🍕', '🍔', '🍟', '🌮', '🍩', '🧁', '🍪', '🎂', '🍰',
+  '🎸', '🥁', '🎺', '🎷', '🎹', '🎻', '🪕', '🪘', '🎤', '🎧',
+  '🎮', '🕹️', '🎯', '🎲', '🎳', '🏀', '⚽', '🎾', '🏈', '🥎',
+  '🚀', '🛸', '✈️', '🚁', '🎈', '🎉', '🎊', '🎁', '🎀', '🎗️',
+  '💎', '🔮', '🧿', '🪄', '🪬', '🧸', '🪅', '🪩', '🧬', '🧪'
+];
+
+// Хэш-функция для определения индекса иконки по нику
+function getPlayerIconIndex(nickname: string): number {
+  let hash = 0;
+  for (let i = 0; i < nickname.length; i++) {
+    const char = nickname.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Преобразуем в 32-битное целое
+  }
+  return Math.abs(hash) % PLAYER_ICONS.length;
+}
+
+// Получить иконку игрока по нику
+function getPlayerIcon(nickname: string): string {
+  return PLAYER_ICONS[getPlayerIconIndex(nickname)];
+}
+
 interface RoomPageProps {
   roomId?: string;
 }
@@ -272,7 +303,8 @@ export function RoomPage({ roomId: propRoomId }: RoomPageProps) {
               <div className="player-info">
                 <span className={`player-role ${player.role}`}>
                   {player.role === 'host' ? '👑' : 
-                   player.role === 'observer' ? '👁️' : '👤'}
+                   player.role === 'observer' ? '👁️' : 
+                   getPlayerIcon(player.nickname)}
                 </span>
                 <span className="player-nickname">{player.nickname}</span>
                 {activeRound && (
