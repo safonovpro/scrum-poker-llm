@@ -105,7 +105,7 @@ export function HomePage() {
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              placeholder="Погоняло"
+              placeholder="Например: Юра"
               required
             />
           </div>
@@ -133,7 +133,7 @@ export function HomePage() {
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              placeholder="Погоняло"
+              placeholder="Например: Юра"
               required
             />
           </div>
