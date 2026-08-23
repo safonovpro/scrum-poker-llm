@@ -34,3 +34,5 @@ logs/
 
 # Podman
 .podman/
+
+.kodacli/settings.json
