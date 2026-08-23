@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/player.dart';
 import '../models/role.dart';
 import '../models/round.dart';
+import '../l10n/app_localizations.dart';
 
 class PlayerList extends StatelessWidget {
   final List<Player> players;
@@ -15,6 +16,7 @@ class PlayerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListView.builder(
       itemCount: players.length,
       itemBuilder: (context, index) {
@@ -32,7 +34,7 @@ class PlayerList extends StatelessWidget {
               ),
             ),
             title: Text(player.nickname),
-            subtitle: Text(_roleLabel(player.role)),
+            subtitle: Text(_roleLabel(player.role, l10n)),
             trailing: hasVoted
                 ? const Icon(Icons.check_circle, color: Colors.green)
                 : const Icon(Icons.circle_outlined, color: Colors.grey),
@@ -42,14 +44,14 @@ class PlayerList extends StatelessWidget {
     );
   }
 
-  String _roleLabel(Role role) {
+  String _roleLabel(Role role, AppLocalizations l10n) {
     switch (role) {
       case Role.host:
-        return 'Ведущий';
+        return l10n.host;
       case Role.player:
-        return 'Участник';
+        return l10n.player;
       case Role.observer:
-        return 'Наблюдатель';
+        return l10n.observer;
     }
   }
 }

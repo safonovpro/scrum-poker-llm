@@ -1,4 +1,7 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/app_bloc.dart';
 
@@ -32,57 +35,70 @@ class VoteCards extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 child: GestureDetector(
-                  onTap: () => onVote(value),
-                  child: AnimatedContainer(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    onVote(value);
+                  },
+                  child: AnimatedScale(
+                    scale: isMyVote ? 1.1 : 1.0,
                     duration: const Duration(milliseconds: 200),
-                    width: 50,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: isMyVote
-                          ? Colors.indigo
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                      width: 50,
+                      height: 70,
+                      decoration: BoxDecoration(
                         color: isMyVote
-                            ? Colors.indigo.shade700
-                            : Colors.grey.shade300,
-                        width: 2,
-                      ),
-                      boxShadow: isMyVote
-                          ? [
-                              BoxShadow(
-                                color: Colors.indigo.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Text(
-                            '$value',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isMyVote
-                                  ? Colors.white
-                                  : Colors.black87,
-                            ),
-                          ),
+                            ? Colors.indigo
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isMyVote
+                              ? Colors.indigo.shade700
+                              : Colors.grey.shade300,
+                          width: 2,
                         ),
-                        if (isMyVote)
-                          const Positioned(
-                            top: 2,
-                            right: 2,
-                            child: Icon(
-                              Icons.check,
-                              size: 14,
-                              color: Colors.white,
+                        boxShadow: isMyVote
+                            ? [
+                                BoxShadow(
+                                  color: Colors.indigo.withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 200),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: isMyVote
+                                    ? Colors.white
+                                    : Colors.black87,
+                              ),
+                              child: Text('$value'),
                             ),
                           ),
-                      ],
+                          if (isMyVote)
+                            AnimatedOpacity(
+                              opacity: 1.0,
+                              duration: const Duration(milliseconds: 200),
+                              child: Positioned(
+                                top: 2,
+                                right: 2,
+                                child: Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

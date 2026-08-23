@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/app_bloc.dart';
 import '../models/role.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/player_list.dart';
 import '../widgets/vote_cards.dart';
 import '../widgets/reveal_panel.dart';
@@ -13,11 +15,12 @@ class RoomScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: BlocBuilder<AppBloc, AppState>(
           builder: (context, state) {
-            final roomName = state.room?.name ?? 'Комната';
+            final roomName = state.room?.name ?? l10n.createRoom;
             return Text(roomName);
           },
         ),
@@ -25,11 +28,11 @@ class RoomScreen extends StatelessWidget {
       body: BlocBuilder<AppBloc, AppState>(
         builder: (context, state) {
           if (state.status == AppStatus.loading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: Text(l10n.loading));
           }
 
           if (state.room == null) {
-            return const Center(child: Text('Комната не найдена'));
+            return Center(child: Text(l10n.roomNotFound));
           }
 
           final room = state.room!;
@@ -42,35 +45,53 @@ class RoomScreen extends StatelessWidget {
             children: [
               // Статус раунда
               if (activeRound != null)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  color: isRoundActive
-                      ? Colors.indigo.shade100
-                      : Colors.green.shade100,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        isRoundActive
-                            ? Icons.hourglass_empty
-                            : Icons.check_circle,
-                        color: isRoundActive ? Colors.indigo : Colors.green,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          isRoundActive
-                              ? 'Раунд активен'
-                              : 'Раунд завершён',
-                          style: TextStyle(
-                            color: isRoundActive ? Colors.indigo.shade900 : Colors.green.shade900,
-                            fontWeight: FontWeight.bold,
+                AnimatedSlide(
+                  offset: const Offset(0, 0),
+                  duration: const Duration(milliseconds: 300),
+                  child: AnimatedOpacity(
+                    opacity: 1.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      color: isRoundActive
+                          ? Colors.indigo.shade100
+                          : Colors.green.shade100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (child, animation) {
+                              return RotationTransition(
+                                turns: animation,
+                                child: child,
+                              );
+                            },
+                            child: Icon(
+                              isRoundActive
+                                  ? Icons.hourglass_empty
+                                  : Icons.check_circle,
+                              key: ValueKey(isRoundActive),
+                              color: isRoundActive ? Colors.indigo : Colors.green,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              isRoundActive
+                                  ? l10n.roundActive
+                                  : l10n.roundFinished,
+                              style: TextStyle(
+                                color: isRoundActive ? Colors.indigo.shade900 : Colors.green.shade900,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
 
@@ -96,17 +117,31 @@ class RoomScreen extends StatelessWidget {
 
               // FAB для действий
               if (isRoundActive && isHost)
-                FloatingActionButton.extended(
-                  onPressed: () => _showRevealDialog(context),
-                  icon: const Icon(Icons.visibility),
-                  label: const Text('Вскрыть карты'),
+                AnimatedScale(
+                  scale: 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: FloatingActionButton.extended(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      _showRevealDialog(context, l10n);
+                    },
+                    icon: const Icon(Icons.visibility),
+                    label: Text(l10n.revealCards),
+                  ),
                 ),
 
               if (!isRoundActive && isHost)
-                FloatingActionButton.extended(
-                  onPressed: () => _showStartRoundDialog(context),
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Начать раунд'),
+                AnimatedScale(
+                  scale: 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: FloatingActionButton.extended(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      _showStartRoundDialog(context, l10n);
+                    },
+                    icon: const Icon(Icons.play_arrow),
+                    label: Text(l10n.startRound),
+                  ),
                 ),
             ],
           );
@@ -115,16 +150,16 @@ class RoomScreen extends StatelessWidget {
     );
   }
 
-  void _showStartRoundDialog(BuildContext context) {
+  void _showStartRoundDialog(BuildContext context, AppLocalizations l10n) {
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Начать раунд'),
+        title: Text(l10n.startRoundTitle),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Описание задачи (необязательно)',
+          decoration: InputDecoration(
+            labelText: l10n.taskDescription,
             alignLabelWithHint: true,
           ),
           maxLines: 3,
@@ -132,37 +167,37 @@ class RoomScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Отмена'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               context.read<AppBloc>().add(StartRoundEvent(controller.text));
               Navigator.pop(ctx);
             },
-            child: const Text('Начать'),
+            child: Text(l10n.start),
           ),
         ],
       ),
     );
   }
 
-  void _showRevealDialog(BuildContext context) {
+  void _showRevealDialog(BuildContext context, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Вскрыть карты?'),
-        content: const Text('Все голоса будут показаны участникам.'),
+        title: Text(l10n.revealTitle),
+        content: Text(l10n.revealContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Отмена'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               context.read<AppBloc>().add(RevealVotesEvent());
               Navigator.pop(ctx);
             },
-            child: const Text('Вскрыть'),
+            child: Text(l10n.reveal),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../blocs/app_bloc.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,9 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scrum Poker'),
+        title: Text(l10n.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -88,27 +90,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Создать комнату',
+                        Text(l10n.createRoom,
                             style: Theme.of(context).textTheme.titleLarge),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _roomNameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Название комнаты',
-                            hintText: 'Спринт 12',
+                          decoration: InputDecoration(
+                            labelText: l10n.roomName,
+                            hintText: l10n.roomNameHint,
                           ),
                           validator: (v) =>
-                              v == null || v.isEmpty ? 'Введите название' : null,
+                              v == null || v.isEmpty ? l10n.roomName : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _nicknameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Ваш псевдоним',
-                            hintText: 'Алексей',
+                          decoration: InputDecoration(
+                            labelText: l10n.nickname,
+                            hintText: l10n.nicknameHint,
                           ),
                           validator: (v) =>
-                              v == null || v.isEmpty ? 'Введите псевдоним' : null,
+                              v == null || v.isEmpty ? l10n.nickname : null,
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
@@ -119,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   width: 20,
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : const Text('Создать'),
+                              : Text(l10n.create),
                         ),
                       ],
                     ),
@@ -133,32 +135,32 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Вступить в комнату',
+                        Text(l10n.joinRoom,
                             style: Theme.of(context).textTheme.titleLarge),
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _inviteLinkController,
-                          decoration: const InputDecoration(
-                            labelText: 'Ссылка на комнату',
-                            hintText: 'https://.../room/abc-123',
+                          decoration: InputDecoration(
+                            labelText: l10n.inviteLink,
+                            hintText: l10n.inviteLinkHint,
                           ),
                           validator: (v) =>
-                              v == null || v.isEmpty ? 'Введите ссылку' : null,
+                              v == null || v.isEmpty ? l10n.inviteLink : null,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _nicknameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Ваш псевдоним',
-                            hintText: 'Алексей',
+                          decoration: InputDecoration(
+                            labelText: l10n.nickname,
+                            hintText: l10n.nicknameHint,
                           ),
                           validator: (v) =>
-                              v == null || v.isEmpty ? 'Введите псевдоним' : null,
+                              v == null || v.isEmpty ? l10n.nickname : null,
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _handleJoin,
-                          child: const Text('Вступить'),
+                          child: Text(l10n.join),
                         ),
                       ],
                     ),

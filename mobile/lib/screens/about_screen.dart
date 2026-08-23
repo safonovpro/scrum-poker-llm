@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('О приложении'),
+        title: Text(l10n.about),
       ),
       body: Center(
         child: Padding(
@@ -24,13 +26,13 @@ class AboutScreen extends StatelessWidget {
               const SizedBox(height: 24),
               // Название
               Text(
-                'Scrum Poker',
+                l10n.appTitle,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 8),
               // Версия
               Text(
-                'Версия 1.0.0',
+                '${l10n.version} 1.0.0',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 32),
@@ -38,12 +40,12 @@ class AboutScreen extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.code),
-                label: const Text('GitHub репозиторий'),
+                label: Text(l10n.sourceCode),
               ),
               const SizedBox(height: 16),
               // Made with Koda
               Text(
-                'Made with Koda',
+                l10n.madeWithKoda,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -41,16 +42,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool('dark_mode', _isDarkMode);
     setState(() => _saving = false);
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Настройки сохранены. Перезапустите приложение.')),
+      SnackBar(content: Text(l10n.settingsSaved)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Настройки'),
+        title: Text(l10n.settings),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -64,13 +67,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Сервер', style: Theme.of(context).textTheme.titleMedium),
+                    Text(l10n.server, style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _urlController,
-                      decoration: const InputDecoration(
-                        labelText: 'URL бэкенда',
-                        hintText: 'http://localhost:5000',
+                      decoration: InputDecoration(
+                        labelText: l10n.backendUrl,
+                        hintText: l10n.backendUrlHint,
                       ),
                     ),
                   ],
@@ -81,8 +84,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Тема
             Card(
               child: SwitchListTile(
-                title: const Text('Тёмная тема'),
-                subtitle: const Text('Использовать тёмное оформление'),
+                title: Text(l10n.darkMode),
+                subtitle: Text(l10n.darkModeSubtitle),
                 value: _isDarkMode,
                 onChanged: (v) => setState(() => _isDarkMode = v),
               ),
@@ -99,7 +102,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Сохранить'),
+                    : Text(l10n.save),
               ),
             ),
           ],

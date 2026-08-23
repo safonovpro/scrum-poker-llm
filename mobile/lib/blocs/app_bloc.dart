@@ -7,6 +7,7 @@ import '../models/round.dart';
 import '../models/vote.dart';
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
+import '../services/session_service.dart';
 
 // ==================== EVENTS ====================
 
@@ -95,6 +96,7 @@ class AppState {
 class AppBloc extends Bloc<AppEvent, AppState> {
   final ApiService apiService;
   final SocketService socketService;
+  final SessionService sessionService;
 
   StreamSubscription? _roomSubscription;
   StreamSubscription? _voteSubscription;
@@ -106,6 +108,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   AppBloc({
     required this.apiService,
     required this.socketService,
+    required this.sessionService,
   }) : super(const AppState()) {
     on<LoadSavedPlayerEvent>(_loadSavedPlayer);
     on<CreateRoomEvent>(_createRoom);
@@ -129,8 +132,33 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   }
 
   Future<void> _loadSavedPlayer(LoadSavedPlayerEvent event, Emitter<AppState> emit) async {
-    // TODO: Загрузить сохранённого игрока из SharedPreferences
-    emit(state.copyWith(status: AppStatus.initial));
+    final session = await sessionService.loadSession();
+    if (session == null) {
+      emit(state.copyWith(status: AppStatus.initial));
+      return;
+    }
+
+    try {
+      emit(state.copyWith(status: AppStatus.loading));
+      final room = await apiService.getRoom(session['room_id']!);
+      final player = room.players.firstWhere(
+        (p) => p.id == session['player_id'],
+        orElse: () => throw Exception('Player not found in room'),
+      );
+
+      socketService.connect(session['room_id']!);
+
+      emit(state.copyWith(
+        room: room,
+        currentPlayer: player,
+        status: AppStatus.loaded,
+        error: null,
+      ));
+    } catch (e) {
+      // Сессия недействительна — очищаем
+      await sessionService.clearSession();
+      emit(state.copyWith(status: AppStatus.initial, error: null));
+    }
   }
 
   Future<void> _createRoom(CreateRoomEvent event, Emitter<AppState> emit) async {
@@ -150,6 +178,12 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       );
 
       socketService.connect(roomId);
+      await sessionService.saveSession(
+        playerId: hostId,
+        roomId: roomId,
+        nickname: event.hostNickname,
+        role: 'host',
+      );
 
       emit(state.copyWith(
         room: room,
@@ -181,6 +215,12 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       final room = await apiService.getRoom(event.roomId);
 
       socketService.connect(event.roomId);
+      await sessionService.saveSession(
+        playerId: data['player_id'],
+        roomId: event.roomId,
+        nickname: event.nickname,
+        role: event.role,
+      );
 
       emit(state.copyWith(
         room: room,
