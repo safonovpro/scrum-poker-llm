@@ -1,0 +1,48 @@
+# Flutter
+build/
+.dart_tool/
+.packages
+*.iml
+
+# Android
+android/.gradle
+android/.idea
+android/app/build
+android/local.properties
+
+# iOS
+ios/.XcodeEditorSources
+ios/.xcuserdata
+ios/Flutter/Generated.xcconfig
+ios/Flutter/generated.xcconfig
+ios/Flutter/AppFrameworkInfo.plist
+ios/Flutter/Release.xcconfig
+ios/Flutter/Debug.xcconfig
+ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS
+macos/.XcodeEditorSources
+macos/.xcuserdata
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Web
+web/vendor
+
+# Windows
+windows/.vscode/
+
+# Linux
+linux/.vscode/
+
+# Firebase
+firebase-debug.log
+firestore-debug.log
+.firebase/
+
+# Misc
+*.swp
+*.swo
+*~
+.DS_Store
+.env
+.env.local
